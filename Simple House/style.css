@@ -1,0 +1,112 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 10px;
+  font-family: 'Open Sans', sans-serif;
+
+  min-height: 200vh;
+}
+
+.header {
+  height: 460px;
+  width: 100%;
+
+  background-image: url('img/simple-house-01.jpg');
+  background-size: cover;
+  /* background-attachment: fixed; */
+  background-position: center bottom;
+  background-repeat: no-repeat;
+
+  color: white;
+}
+
+.header__content {
+  position: relative;
+
+  height: 100%;
+}
+
+.header__inner_content {
+  position: absolute;
+  bottom: 15%;
+  left: 5%;
+
+  width: 100%;
+}
+
+.header__logo {
+  margin-right: 5%;
+}
+
+.header__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.header__title {
+  font-size: 3.5rem;
+  font-weight: 400;
+}
+
+.header__description {
+  font-size: 1.7rem;
+  font-weight: 400;
+}
+
+.nav {
+  position: absolute;
+  bottom: 5%;
+  right: 0;
+
+  width: 100%;
+}
+
+.nav__list {
+  display: flex;
+  justify-content: flex-end;
+
+  list-style: none;
+}
+
+.nav__item {
+  padding: 0 15px;
+  flex-basis: 25%;
+
+  text-align: center;
+}
+
+.nav__link--active {
+  border-bottom: 1px solid white;
+}
+
+.nav__link {
+  padding-bottom: 10px;
+
+  font-size: 1.7rem;
+  text-decoration: none;
+  color: white;
+}
+
+.nav__link:hover {
+  border-bottom: 1px solid white;
+}
+
+@media (orientation: portrait) and (min-height: 640px) {
+  .header__inner_content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .header__title {
+    padding: 0;
+  }
+  .nav__item {
+    flex-basis: 20%;
+  }
+}
