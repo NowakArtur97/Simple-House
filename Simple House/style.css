@@ -6,9 +6,7 @@
 
 html {
   font-size: 10px;
-  font-family: 'Open Sans', sans-serif;
-
-  min-height: 200vh;
+  font-family: 'Open Sans', Arial, sans-serif;
 }
 
 body {
@@ -125,4 +123,31 @@ body {
   .nav {
     align-self: center;
   }
+}
+
+.main {
+  margin-top: 80px;
+  padding: 0 10px;
+}
+
+.welcome {
+  display: flex;
+  flex-direction: column;
+
+  height: 320px;
+}
+
+.welcome__header {
+  margin-bottom: 30px;
+
+  font-size: 3.2rem;
+  font-weight: 400;
+  text-align: center;
+}
+
+.welcome__description {
+  line-height: 25px;
+  text-align: center;
+  font-size: 1.7rem;
+  color: rgb(98, 99, 100);
 }
