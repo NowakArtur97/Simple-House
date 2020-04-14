@@ -11,9 +11,8 @@ html {
 
 body {
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-
-  min-height: 300vh;
 }
 
 .header {
@@ -100,6 +99,7 @@ body {
 
   .header__inner_content {
     display: flex;
+    align-items: flex-start;
   }
 }
 
@@ -189,4 +189,74 @@ body {
 .category_nav__link--active {
   background-color: rgb(47, 149, 109);
   color: white;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.dish {
+  flex-basis: 25%;
+
+  margin: 16px 0;
+  padding: 15px;
+}
+
+.dish__name {
+  margin: 18px 0 15px;
+
+  font-size: 2.1rem;
+  font-weight: normal;
+  color: #1a6692;
+}
+
+.dish__description {
+  margin: 15px 0;
+
+  line-height: 1.8;
+  font-size: 1.5rem;
+  color: #626364;
+}
+
+.dish__price {
+  font-size: 2rem;
+  color: #2f956d;
+}
+
+@media (min-width: 768px) {
+  .menu {
+    justify-content: flex-start;
+
+    margin: 0 -15px;
+    max-width: 840px;
+  }
+
+  .dish__image {
+    width: 100%;
+  }
+
+  .dish {
+    flex-basis: calc(100% / 3);
+
+    padding: 15px;
+    margin: 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .menu {
+    max-width: 1120px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .menu {
+    margin: 0 auto;
+  }
+
+  .dish {
+    flex-basis: 25%;
+  }
 }
