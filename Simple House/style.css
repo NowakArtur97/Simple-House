@@ -195,6 +195,8 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+
+  margin-bottom: 80px;
 }
 
 .dish {
@@ -229,7 +231,7 @@ body {
   .menu {
     justify-content: flex-start;
 
-    margin: 0 -15px;
+    margin: 0 -15px 80px;
     max-width: 840px;
   }
 
@@ -251,9 +253,9 @@ body {
   }
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 1025px) {
   .menu {
-    margin: 0 auto;
+    margin: 0 auto 80px;
   }
 
   .dish {
