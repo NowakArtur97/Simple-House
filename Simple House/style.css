@@ -213,12 +213,42 @@ body {
   padding: 15px;
 }
 
+.gallery__image_container {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.gallery__image--rectangle {
+  align-self: center;
+  width: 160px;
+  height: 240px;
+}
+
 .gallery__name {
   margin: 18px 0 15px;
 
   font-size: 2.1rem;
   font-weight: normal;
+}
+
+.galler__title {
+  margin-bottom: 20px;
+
+  font-size: 1.7rem;
+  color: #c39;
+}
+
+.gallery__name--dark_blue {
   color: #1a6692;
+}
+
+.gallery__name--light_blue {
+  color: #09c;
+}
+
+.gallery__name--bigger {
+  font-size: 2.5rem;
 }
 
 .gallery__description {
@@ -227,6 +257,10 @@ body {
   line-height: 1.8;
   font-size: 1.5rem;
   color: #626364;
+}
+
+.gallery__description--bigger {
+  font-size: 1.7rem;
 }
 
 .gallery__price {
