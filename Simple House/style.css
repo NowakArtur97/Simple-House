@@ -21,7 +21,7 @@ body {
   height: 460px;
   width: 100%;
 
-  background-image: url('../img/simple-house-01.jpg');
+  background-image: url('img/simple-house-01.jpg');
   background-size: cover;
   /* background-attachment: fixed; */
   background-position: center bottom;
@@ -229,7 +229,7 @@ body {
   margin: 18px 0 15px;
 
   font-size: 2.1rem;
-  font-weight: normal;
+  font-weight: 300;
 }
 
 .galler__title {
@@ -276,15 +276,29 @@ body {
     max-width: 840px;
   }
 
+  .gallery {
+    flex-basis: calc(100% / 3);
+
+    margin: 15px 0;
+  }
+
+  .gallery__image_container--fixed {
+    flex-direction: row;
+  }
+
   .gallery__image {
     width: 100%;
   }
 
-  .gallery {
-    flex-basis: calc(100% / 3);
+  .gallery__image--rectangle {
+    width: 160px;
+    height: 240px;
 
-    padding: 15px;
-    margin: 0;
+    margin-right: 20px;
+  }
+
+  .gallery__name--bigger {
+    margin-top: 0;
   }
 }
 
@@ -292,14 +306,25 @@ body {
   .menu {
     max-width: 1120px;
   }
-}
 
-@media (min-width: 1025px) {
-  .menu {
-    margin: 0 auto 80px;
+  .staff {
+    display: flex;
+    flex-wrap: wrap;
+
+    max-width: 1120px;
   }
 
   .gallery {
+    flex-basis: 50%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .menu {
+    margin: 0 -15px 80px;
+  }
+
+  .gallery--four-col {
     flex-basis: 25%;
   }
 }
