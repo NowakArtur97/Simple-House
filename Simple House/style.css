@@ -383,7 +383,7 @@ body {
   color: #626364;
 }
 
-.read_more__button {
+.button_primary {
   align-self: flex-end;
 
   display: inline-block;
@@ -419,7 +419,7 @@ body {
 }
 
 @media (min-width: 1024px) {
-  .read_more__button {
+  .button_primary {
     margin-right: 25px;
   }
 }
@@ -437,9 +437,10 @@ body {
 }
 
 .mirror {
-  margin: 50px auto;
-  width: 290px;
+  min-width: 290px;
   height: 220px;
+  margin: 40px auto;
+  padding: 15px;
 }
 
 .mirror__image {
