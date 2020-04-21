@@ -23,7 +23,7 @@ body {
 
   background-image: url('img/simple-house-01.jpg');
   background-size: cover;
-  /* background-attachment: fixed; */
+  background-attachment: fixed;
   background-position: center bottom;
   background-repeat: no-repeat;
 
@@ -115,7 +115,7 @@ body {
 
 @media (min-width: 1024px) {
   .header__info {
-    margin-left: 30px;
+    margin-left: 15px;
   }
 
   .header__logo {
@@ -434,4 +434,20 @@ body {
   color: #626364;
   line-height: 1.8;
   text-align: center;
+}
+
+.mirror {
+  margin: 50px auto;
+  width: 290px;
+  height: 220px;
+}
+
+.mirror__image {
+  height: 100%;
+
+  background-image: url('img/about-05.jpg');
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
 }
