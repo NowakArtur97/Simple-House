@@ -376,22 +376,10 @@ body {
 }
 
 .read_more__description {
-  margin: 15px 0 30px;
+  margin: 15px 0 10px;
 
   line-height: 1.8;
   font-size: 1.7rem;
-  color: #626364;
-}
-
-.button_primary {
-  align-self: flex-end;
-
-  display: inline-block;
-  padding: 10px 30px;
-  border: 1px solid #ccc;
-
-  font-size: 1.6rem;
-  text-decoration: none;
   color: #626364;
 }
 
@@ -418,24 +406,6 @@ body {
   }
 }
 
-@media (min-width: 1024px) {
-  .button_primary {
-    margin-right: 25px;
-  }
-}
-
-.footer {
-  margin: 40px auto 10px;
-  padding: 25px 15px;
-}
-
-.footer__info {
-  font-size: 17px;
-  color: #626364;
-  line-height: 1.8;
-  text-align: center;
-}
-
 .mirror {
   min-width: 290px;
   height: 220px;
@@ -451,4 +421,99 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0 15px;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  padding: 45px 20px;
+}
+
+.feature__icon {
+  margin-bottom: 65px;
+
+  font-size: 6.5rem;
+  color: #9f9c9c;
+}
+
+.feature__description {
+  margin-bottom: 35px;
+
+  line-height: 1.8;
+  font-size: 1.6rem;
+  text-align: center;
+  color: #626364;
+}
+
+@media (min-width: 992px) {
+  .features {
+    flex-wrap: wrap;
+    flex-direction: row;
+
+    padding: 0 15px;
+  }
+
+  .feature {
+    flex-basis: calc(100% / 3);
+  }
+}
+
+.footer {
+  margin: 0px auto 10px;
+  padding: 10px 15px;
+}
+
+.footer__info {
+  font-size: 17px;
+  color: #626364;
+  line-height: 1.8;
+  text-align: center;
+}
+
+.button_primary {
+  display: inline-block;
+  padding: 10px 30px;
+
+  font-size: 1.6rem;
+  color: white;
+  text-decoration: none;
+}
+
+.button_primary--end {
+  align-self: flex-end;
+}
+
+@media (min-width: 1024px) {
+  .button_primary--end {
+    margin-right: 25px;
+  }
+}
+
+.button_primary--gray {
+  color: #626364;
+  border: 1px solid #ccc;
+}
+
+.button_primary--blue {
+  background-color: #2d99cc;
+}
+
+.button_primary--green {
+  background-color: #319966;
+}
+
+.button_primary--red {
+  background-color: #993332;
 }
