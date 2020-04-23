@@ -364,14 +364,14 @@ body {
   align-items: flex-start;
   justify-content: space-between;
 
-  margin: 0 15px;
+  margin: 0;
 }
 
 .read_more__title {
   margin: 21px 0 15px;
 
   font-size: 2.2rem;
-  font-weight: normal;
+  font-weight: 300;
   color: #1a6692;
 }
 
