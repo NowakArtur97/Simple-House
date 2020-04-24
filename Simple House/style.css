@@ -512,7 +512,49 @@ body {
 }
 
 .contact_form__textarea {
+  resize: none;
+
   font-family: monospace;
+}
+
+.contact_info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+
+  font-size: 1.7rem;
+}
+
+.contact_info__header {
+  margin-bottom: 30px;
+
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: #319966;
+}
+
+.contact_info__address {
+  margin-bottom: 50px;
+
+  line-height: 1.8;
+  font-style: normal;
+  color: #626364;
+}
+
+.contact_info__contact {
+  display: inline-block;
+
+  margin-bottom: 25px;
+
+  color: #626364;
+  text-decoration: none;
+}
+
+.contact_icon {
+  margin-right: 25px;
+
+  color: #319966;
 }
 
 .footer {
