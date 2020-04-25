@@ -476,7 +476,7 @@ body {
   justify-content: center;
   align-items: center;
 
-  padding: 0 15px;
+  margin-bottom: 60px;
 }
 
 .contact_form {
@@ -484,6 +484,8 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  padding: 15px;
 }
 
 .contact_form__group {
@@ -518,10 +520,7 @@ body {
 }
 
 .contact_info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+  padding: 15px;
 
   font-size: 1.7rem;
 }
@@ -545,16 +544,36 @@ body {
 .contact_info__contact {
   display: inline-block;
 
-  margin-bottom: 25px;
+  margin: 0 25px 25px 0;
 
   color: #626364;
   text-decoration: none;
 }
 
 .contact_icon {
-  margin-right: 25px;
+  margin-right: 10px;
 
   color: #319966;
+}
+
+@media (min-width: 768px) {
+  .contact_container {
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: flex-start;
+  }
+
+  .contact_form {
+    flex-basis: 45%;
+  }
+
+  .contact_info {
+    flex-basis: 45%;
+  }
+
+  .contact_info__contact {
+    display: block;
+  }
 }
 
 .footer {
