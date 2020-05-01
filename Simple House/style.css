@@ -576,6 +576,21 @@ body {
   }
 }
 
+.map_container {
+  height: 450px;
+  max-width: 840px;
+
+  margin: 0 auto;
+  padding: 0px 15px;
+}
+
+.map {
+  height: 100%;
+  width: 100%;
+
+  border: none;
+}
+
 .footer {
   margin: 0px auto 10px;
   padding: 10px 15px;
