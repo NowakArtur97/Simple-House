@@ -592,6 +592,8 @@ body {
 }
 
 .faq {
+  max-width: 650px;
+  margin: 0 auto;
   padding: 0 15px;
 }
 
@@ -611,9 +613,14 @@ body {
 }
 
 .faq__answer {
-  padding: 17px 20px 30px;
+  padding: 20px 0 0;
+}
 
-  color: #626364;
+.faq__text {
+  display: block;
+  padding: 5px 14px 10px;
+
+  color: #4f6172;
   line-height: 1.8;
   font-size: 1.7rem;
 
@@ -622,7 +629,9 @@ body {
 }
 
 .footer {
-  margin: 0px auto 10px;
+  max-width: 1120px;
+
+  margin: 20px auto 10px;
   padding: 10px 15px;
 }
 
@@ -671,14 +680,30 @@ body {
 }
 
 .button_primary--accordion {
+  position: relative;
   width: 100%;
   margin-bottom: 17px;
   margin-top: 17px;
   padding: 10px 20px 6px;
   border: 1px solid #d0d0d0;
 
+  text-align: left;
   font-size: 1.9rem;
   color: #999;
   background-color: transparent;
   cursor: pointer;
+}
+
+.button_primary--accordion:after {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding-right: 20px;
+
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  content: '\f0d9';
+  font-size: 3.2rem;
+  color: #999;
+  margin-left: 5px;
 }
