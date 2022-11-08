@@ -4,7 +4,18 @@ Resources:
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref BucketName
+      BucketName: !Join
+      - "-"
+      - - "simple-house"
+        - !Select
+          - 0
+          - !Split
+            - "-"
+            - !Select
+              - 2
+              - !Split
+                - "/"
+                - !Ref "AWS::StackId"
       AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html
@@ -21,8 +32,8 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: "s3:GetObject"
-            Resource: "arn:aws:s3:::simple-house/*"
+            Resource: !Sub 'arn:aws:s3:::${S3Bucket}/*'
 Outputs:
   BucketUrl:
-    Description: "S3 Bucket Url"
-    Value: !GetAtt "S3Bucket.WebsiteURL"
+    Description: 'S3 Bucket Url'
+    Value: !GetAtt 'S3Bucket.WebsiteURL'
