@@ -9,27 +9,28 @@ print('Loading function')
 
 s3 = boto3.resource('s3')
 
+baseUrl = "https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/"
 urls = [
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/index.html",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/about.html",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/contact.html",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/style.css",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/simple-house-logo.png",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/simple-house-01.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/about-01.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/about-02.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/about-03.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/about-04.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/about-05.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/about-06.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/dummy-img.png",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/img-01.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/gallery/01.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/gallery/02.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/gallery/03.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/gallery/04.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/gallery/05.jpg",
-"https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/img/gallery/06.jpg",
+baseUrl + "index.html",
+baseUrl + "about.html",
+baseUrl + "contact.html",
+baseUrl + "style.css",
+baseUrl + "img/simple-house-logo.png",
+baseUrl + "img/simple-house-01.jpg",
+baseUrl + "img/about-01.jpg",
+baseUrl + "img/about-02.jpg",
+baseUrl + "img/about-03.jpg",
+baseUrl + "img/about-04.jpg",
+baseUrl + "img/about-05.jpg",
+baseUrl + "img/about-06.jpg",
+baseUrl + "img/dummy-img.png",
+baseUrl + "img/img-01.jpg",
+baseUrl + "img/gallery/01.jpg",
+baseUrl + "img/gallery/02.jpg",
+baseUrl + "img/gallery/03.jpg",
+baseUrl + "img/gallery/04.jpg",
+baseUrl + "img/gallery/05.jpg",
+baseUrl + "img/gallery/06.jpg",
 ]
 
 def resolve_content_type(extension):
