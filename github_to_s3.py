@@ -72,7 +72,7 @@ def copy_to_s3(resource, bucket):
     upload_to_s3(resource, filePath, bucket)
 
 def lambda_handler(event, context):
-    bucket = "simple-house-687fffc0"
+    bucket = os.environ['BUCKET_NAME']
     resources = map(map_to_resource, urls)
 
     try:

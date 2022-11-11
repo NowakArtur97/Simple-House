@@ -68,6 +68,9 @@ Resources:
       Timeout: 15
       Handler: index.lambda_handler
       Role: !GetAtt LambdaFunctionRole.Arn
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref S3Bucket
       Code:
         ZipFile: |
           import os
@@ -144,7 +147,7 @@ Resources:
               upload_to_s3(resource, filePath, bucket)
 
           def lambda_handler(event, context):
-              bucket = "simple-house-9478f4d0"
+              bucket = os.environ['BUCKET_NAME']
               resources = map(map_to_resource, urls)
 
               try:
