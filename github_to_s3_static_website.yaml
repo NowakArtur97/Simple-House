@@ -5,17 +5,17 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Join
-      - "-"
-      - - "simple-house"
-        - !Select
-          - 0
-          - !Split
-            - "-"
-            - !Select
-              - 2
-              - !Split
-                - "/"
-                - !Ref "AWS::StackId"
+        - "-"
+        - - "simple-house"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
       AccessControl: PublicRead
       WebsiteConfiguration:
         IndexDocument: index.html
@@ -32,8 +32,134 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: "s3:GetObject"
-            Resource: !Sub 'arn:aws:s3:::${S3Bucket}/*'
+            Resource: !Sub "arn:aws:s3:::${S3Bucket}/*"
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: LambdaFunctionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: "*"
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.9
+      Timeout: 15
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaFunctionRole.Arn
+      Code:
+        ZipFile: |
+          import os
+          import urllib.request
+          from urllib.parse import urlparse
+          import json
+          import boto3
+
+          print('Loading function')
+
+          s3 = boto3.resource('s3')
+
+          baseUrl = "https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/"
+          urls = [
+          baseUrl + "index.html",
+          baseUrl + "about.html",
+          baseUrl + "contact.html",
+          baseUrl + "style.css",
+          baseUrl + "img/simple-house-logo.png",
+          baseUrl + "img/simple-house-01.jpg",
+          baseUrl + "img/about-01.jpg",
+          baseUrl + "img/about-02.jpg",
+          baseUrl + "img/about-03.jpg",
+          baseUrl + "img/about-04.jpg",
+          baseUrl + "img/about-05.jpg",
+          baseUrl + "img/about-06.jpg",
+          baseUrl + "img/dummy-img.png",
+          baseUrl + "img/img-01.jpg",
+          baseUrl + "img/gallery/01.jpg",
+          baseUrl + "img/gallery/02.jpg",
+          baseUrl + "img/gallery/03.jpg",
+          baseUrl + "img/gallery/04.jpg",
+          baseUrl + "img/gallery/05.jpg",
+          baseUrl + "img/gallery/06.jpg",
+          ]
+
+          def resolve_content_type(extension):
+              if extension == "html":
+                  return "text/html"
+              elif extension == "css":
+                  return "text/css"
+              elif extension == "png":
+                  return "image/png"
+              else:
+                  return "image/jpeg"
+
+          def map_to_resource(url):
+              extension = url.rsplit('.', 1)[1]
+              return GithubResource(url, resolve_content_type(extension))
+
+          def save_to_local(resource):
+              url = resource.url
+              urlPath = urlparse(url).path
+              fileName = os.path.basename(urlPath)
+              filePath = '/tmp/' + fileName
+              urllib.request.urlretrieve(url, filePath)
+              return filePath
+
+          def resolve_key(url, fileName):
+              if "/img/gallery/" in url:
+                  return "img/gallery/" + fileName
+              elif "/img/" in url:
+                  return "img/" + fileName
+              else:
+                  return fileName
+
+          def upload_to_s3(resource, filePath, bucket):
+              fileName = os.path.basename(filePath)
+              key = resolve_key(resource.url, fileName)
+              s3.Object(bucket, key).put(Body=open(filePath, 'rb'), ContentType=resource.extension)
+
+          def copy_to_s3(resource, bucket):
+              filePath = save_to_local(resource)
+              upload_to_s3(resource, filePath, bucket)
+
+          def lambda_handler(event, context):
+              bucket = "simple-house-9478f4d0"
+              resources = map(map_to_resource, urls)
+
+              try:
+                  for resource in resources:
+                      copy_to_s3(resource, bucket)
+
+              except Exception as e:
+                  print("Exception on copy")
+                  print(e)
+                  return
+          class GithubResource:
+            def __init__(self, url, extension):
+              self.url = url
+              self.extension = extension
 Outputs:
-  BucketUrl:
-    Description: 'S3 Bucket Url'
-    Value: !GetAtt 'S3Bucket.WebsiteURL'
+  WebsiteUrl:
+    Description: "Website Url"
+    Value: !GetAtt "S3Bucket.WebsiteURL"
