@@ -3,10 +3,13 @@ import urllib.request
 from urllib.parse import urlparse
 import json
 import boto3
+from bs4 import BeautifulSoup
 
 print('Loading function')
 
 s3 = boto3.resource('s3')
+page = requests.get("https://github.com/NowakArtur97/Simple-House")
+soup = BeautifulSoup(page.content, 'html.parser')
 
 baseUrl = "https://raw.githubusercontent.com/NowakArtur97/Simple-House/master/"
 urls = [
@@ -74,6 +77,9 @@ def copy_to_s3(resource, bucket):
 def lambda_handler(event, context):
     bucket = os.environ['BUCKET_NAME']
     resources = map(map_to_resource, urls)
+    files = soup.find_all(class_="Box-row")
+    for f in files:
+            print(f.get_text())
 
     try:
         for resource in resources:
