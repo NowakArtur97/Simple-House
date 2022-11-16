@@ -10,6 +10,16 @@ print('Loading function')
 
 s3 = boto3.resource('s3')
 
+def find_all_links(url):
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+    allFiles = soup.find_all('a', href=True, class_='js-navigation-open Link--primary')
+    ignored = os.environ['IGNORE_FILES']
+    branch = os.environ['BRANCH']
+    files = filter(lambda f: f.get_text() not in ignored, allFiles)
+    links = map(lambda f: url.replace("github", "raw.githubusercontent") + "/" + branch + "/" + f.get_text(), files)
+    return links
+
 def resolve_content_type(extension):
     if extension == "html":
         return "text/html"
@@ -22,22 +32,9 @@ def resolve_content_type(extension):
     else:
         return "image/jpeg"
 
-def map_to_resources(url):
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    
-    # allFiles = soup.find_all(True, class_=['js-navigation-open', 'Link--primary'])
-    allFiles = soup.find_all('a', class_='js-navigation-open Link--primary')
-    ignored = os.environ['IGNORE_FILES']
-    files = filter(lambda f: f.get_text() not in ignored, allFiles)
-    # extension = url.rsplit('.', 1)[1]
-    for f in allFiles:
-        print(f.get_text())
-    print("*************")
-    for f in files:
-        print(f.get_text())
-    return files
-    # return GithubResource(url, resolve_content_type(extension))
+def map_to_resource(url):
+    extension = url.rsplit('.', 1)[1]
+    return GithubResource(url, resolve_content_type(extension))
 
 def save_to_local(resource):
     url = resource.url
@@ -67,16 +64,16 @@ def copy_to_s3(resource, bucket):
 def lambda_handler(event, context):
     bucket = os.environ['BUCKET_NAME']
     repositoryUrl = os.environ['REPOSITORY_URL']
-    resources = map_to_resources(repositoryUrl)
+    links = find_all_links(repositoryUrl)
+    resources = map(map_to_resource, links)
+    try:
+        for resource in resources:
+            copy_to_s3(resource, bucket)
+    except Exception as e:
+        print("Exception on copy")
+        print(e)
+        return
 
-    # try:
-    #     for resource in resources:
-    #         copy_to_s3(resource, bucket)
-
-    # except Exception as e:
-    #     print("Exception on copy")
-    #     print(e)
-    #     return
 class GithubResource:
   def __init__(self, url, extension):
     self.url = url

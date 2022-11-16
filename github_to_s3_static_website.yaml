@@ -73,6 +73,7 @@ Resources:
           BUCKET_NAME: !Ref S3Bucket
           REPOSITORY_URL: https://github.com/NowakArtur97/Simple-House
           IGNORE_FILES: [README.md]
+          BRANCH: master
       Code:
         ZipFile: |
           import os
