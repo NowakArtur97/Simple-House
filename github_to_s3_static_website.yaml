@@ -71,6 +71,8 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: !Ref S3Bucket
+          REPOSITORY_URL: https://github.com/NowakArtur97/Simple-House
+          IGNORE_FILES: [README.md]
       Code:
         ZipFile: |
           import os
