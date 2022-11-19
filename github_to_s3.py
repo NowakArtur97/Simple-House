@@ -23,15 +23,21 @@ def find_all_resources(url):
     wrapperElement = soup.find_all('div', class_= [WRAPPER_CLASS])[0]
     allFilesElements = wrapperElement.find_all('div', class_= ELEMENT_CLASS)
     notIgnored = filter(lambda f: f.find('a', href=True, class_= LINK_CLASS).get_text() not in ignored, allFilesElements)
-    return map(lambda fileElement: map_to_resource(fileElement, get_raw_url(url, branch)), notIgnored)
+    return map(lambda fileElement: map_to_resource(fileElement, url, branch), notIgnored)
 
 def get_raw_url(url, branch):
     return url.replace("github", "raw.githubusercontent") + "/" + branch + "/"
 
-def map_to_resource(fileElement, url):
+def map_to_resource(fileElement, url, branch):
     isFolder = fileElement.find('svg', class_='octicon')['aria-label'] == "Directory"
-    link = url + fileElement.find('a', href=True, class_='Link--primary').get_text()
-    extension = resolve_content_type(link)
+    link = ""
+    extension = ""
+    resourceName = fileElement.find('a', href=True, class_='Link--primary').get_text()
+    if isFolder:
+        link = url + "/tree/" + branch + "/" + resourceName
+    else:
+        link = get_raw_url(url, branch) + resourceName
+        extension = resolve_content_type(link)
     return GithubResource(link, extension, isFolder)
 
 def resolve_content_type(url):
