@@ -8,20 +8,31 @@ from urllib.parse import urlparse
 
 print('Loading function')
 
+WRAPPER_CLASS = 'Box mb-3'
+ELEMENT_CLASS = 'Box-row Box-row--focus-gray py-2 d-flex position-relative js-navigation-item'
+LINK_CLASS = 'Link--primary'
+
 s3 = boto3.resource('s3')
 
+ignored = os.environ['IGNORE_FILES']
+branch = os.environ['BRANCH']
+
 def find_all_resources(url):
-    print("find_all_resources")
-    ignored = os.environ['IGNORE_FILES']
-    branch = os.environ['BRANCH']
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
-    wrapperElement = soup.find_all('div', class_= ['Box mb-3'])[0]
-    allFilesElements = wrapperElement.find_all('div', class_= 'Box-row Box-row--focus-gray py-2 d-flex position-relative js-navigation-item')
-    notIgnored = filter(lambda f: f.find('a', href=True, class_='Link--primary').get_text() not in ignored, allFilesElements)
-    files = filter(lambda f: f.find('svg', class_='octicon')['aria-label'] != "Directory", notIgnored)
-    links = map(lambda f: url.replace("github", "raw.githubusercontent") + "/" + branch + "/" + f.find('a', href=True, class_='Link--primary').get_text(), files)
-    return map(lambda l: GithubResource(l, resolve_content_type(l), False), links)
+    wrapperElement = soup.find_all('div', class_= [WRAPPER_CLASS])[0]
+    allFilesElements = wrapperElement.find_all('div', class_= ELEMENT_CLASS)
+    notIgnored = filter(lambda f: f.find('a', href=True, class_= LINK_CLASS).get_text() not in ignored, allFilesElements)
+    return map(lambda fileElement: map_to_resource(fileElement, get_raw_url(url, branch)), notIgnored)
+
+def get_raw_url(url, branch):
+    return url.replace("github", "raw.githubusercontent") + "/" + branch + "/"
+
+def map_to_resource(fileElement, url):
+    isFolder = fileElement.find('svg', class_='octicon')['aria-label'] == "Directory"
+    link = url + fileElement.find('a', href=True, class_='Link--primary').get_text()
+    extension = resolve_content_type(link)
+    return GithubResource(link, extension, isFolder)
 
 def resolve_content_type(url):
     extension = url.rsplit('.', 1)[1]
@@ -35,12 +46,6 @@ def resolve_content_type(url):
         return "image/png"
     else:
         return "image/jpeg"
-
-def map_to_resource(url):
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-    extension = url.rsplit('.', 1)[1]
-    return GithubResource(url, resolve_content_type(extension))
 
 def save_to_local(resource):
     url = resource.url
