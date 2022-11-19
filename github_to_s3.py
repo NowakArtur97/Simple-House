@@ -18,13 +18,13 @@ def find_all_resources(url):
     soup = BeautifulSoup(page.content, 'html.parser')
     wrapperElement = soup.find_all('div', class_= ['Box mb-3'])[0]
     allFilesElements = wrapperElement.find_all('div', class_= 'Box-row Box-row--focus-gray py-2 d-flex position-relative js-navigation-item')
-    notIgnored = filter(lambda f: f.find('a', href=True, class_='Link--primary').get_text() not in ignored, allFilesElements) 
+    notIgnored = filter(lambda f: f.find('a', href=True, class_='Link--primary').get_text() not in ignored, allFilesElements)
     files = filter(lambda f: f.find('svg', class_='octicon')['aria-label'] != "Directory", notIgnored)
     links = map(lambda f: url.replace("github", "raw.githubusercontent") + "/" + branch + "/" + f.find('a', href=True, class_='Link--primary').get_text(), files)
-    for resource in links:
-        print(resource)
+    return map(lambda l: GithubResource(l, resolve_content_type(l), False), links)
 
-def resolve_content_type(extension):
+def resolve_content_type(url):
+    extension = url.rsplit('.', 1)[1]
     if extension == "html":
         return "text/html"
     elif extension == "css":
@@ -71,11 +71,10 @@ def lambda_handler(event, context):
     bucket = os.environ['BUCKET_NAME']
     repositoryUrl = os.environ['REPOSITORY_URL']
     resources = find_all_resources(repositoryUrl)
-    # print("resources")
-    # for resource in resources:
-    #     print(resource.url)
-    #     print(resource.extension)
-    #     print(resource.isFolder)
+    for resource in resources:
+        print(resource.url)
+        print(resource.extension)
+        print(resource.isFolder)
     # try:
     #     for resource in resources:
     #         copy_to_s3(resource, bucket)
