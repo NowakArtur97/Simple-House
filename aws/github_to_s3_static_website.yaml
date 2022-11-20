@@ -72,7 +72,7 @@ Resources:
         Variables:
           BUCKET_NAME: !Ref S3Bucket
           REPOSITORY_URL: https://github.com/NowakArtur97/Simple-House
-          IGNORE_FILES: README.md
+          IGNORED: README.md,aws
           BRANCH: master
       Code:
         ZipFile: |
@@ -93,7 +93,7 @@ Resources:
 
           s3 = boto3.resource('s3')
 
-          ignored = os.environ['IGNORE_FILES']
+          ignored = os.environ['IGNORED']
           branch = os.environ['BRANCH']
 
           def find_all_resources(url, nestedPath="", resources=[]):

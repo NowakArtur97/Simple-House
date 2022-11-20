@@ -15,7 +15,7 @@ DIRECTORY_ICON_CLASS = 'octicon'
 
 s3 = boto3.resource('s3')
 
-ignored = os.environ['IGNORE_FILES']
+ignored = os.environ['IGNORED']
 branch = os.environ['BRANCH']
 
 def find_all_resources(url, nestedPath="", resources=[]):
