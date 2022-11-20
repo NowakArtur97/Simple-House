@@ -11,34 +11,52 @@ print('Loading function')
 WRAPPER_CLASS = 'Box mb-3'
 ELEMENT_CLASS = 'Box-row Box-row--focus-gray py-2 d-flex position-relative js-navigation-item'
 LINK_CLASS = 'Link--primary'
+DIRECTORY_ICON_CLASS = 'octicon'
 
 s3 = boto3.resource('s3')
 
 ignored = os.environ['IGNORE_FILES']
 branch = os.environ['BRANCH']
 
-def find_all_resources(url):
+def find_all_resources(url, nestedPath="", resources=[]):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, 'html.parser')
-    wrapperElement = soup.find_all('div', class_= [WRAPPER_CLASS])[0]
-    allFilesElements = wrapperElement.find_all('div', class_= ELEMENT_CLASS)
-    notIgnored = filter(lambda f: f.find('a', href=True, class_= LINK_CLASS).get_text() not in ignored, allFilesElements)
-    return map(lambda fileElement: map_to_resource(fileElement, url, branch), notIgnored)
+    wrapperElement = soup.find('div', class_=[WRAPPER_CLASS])
+    allFilesElements = wrapperElement.find_all('div', class_=ELEMENT_CLASS)
+    notIgnored = filter(lambda f: f.find('a', href=True, class_=LINK_CLASS).get_text() not in ignored, allFilesElements)
+    for element in notIgnored:
+        isDirectory = element.find('svg', class_=DIRECTORY_ICON_CLASS)['aria-label'] == "Directory"
+        resourceName = element.find('a', href=True, class_=LINK_CLASS).get_text()
+        link = url + "/" + resourceName
+        if isDirectory:
+            if nestedPath == "":
+                nestedResources = find_all_resources(link, resourceName, resources)
+                flatten = flatten_list(nestedResources)
+                resources.append(flatten)
+            else:
+                nestedResources = find_all_resources(link, nestedPath + "/" + resourceName, resources)
+                flatten = flatten_list(nestedResources)
+                resources.append(flatten)
+        else:
+            extension = resolve_content_type(link)
+            if nestedPath == "":
+                resource = GithubResource(get_raw_url(link), extension, resourceName)
+                resources.append(resource)
+            else:
+                resource = GithubResource(get_raw_url(link), extension, nestedPath + "/" + resourceName)
+                resources.append(resource)
 
-def get_raw_url(url, branch):
-    return url.replace("github", "raw.githubusercontent") + "/" + branch + "/"
+    return flatten_list(resources)
 
-def map_to_resource(fileElement, url, branch):
-    isFolder = fileElement.find('svg', class_='octicon')['aria-label'] == "Directory"
-    link = ""
-    extension = ""
-    resourceName = fileElement.find('a', href=True, class_='Link--primary').get_text()
-    if isFolder:
-        link = url + "/tree/" + branch + "/" + resourceName
-    else:
-        link = get_raw_url(url, branch) + resourceName
-        extension = resolve_content_type(link)
-    return GithubResource(link, extension, isFolder)
+def flatten_list(_2d_list):
+    flat_list = []
+    for element in _2d_list:
+        if type(element) is list:
+            for item in element:
+                flat_list.append(item)
+        else:
+            flat_list.append(element)
+    return flat_list
 
 def resolve_content_type(url):
     extension = url.rsplit('.', 1)[1]
@@ -53,6 +71,9 @@ def resolve_content_type(url):
     else:
         return "image/jpeg"
 
+def get_raw_url(url):
+    return url.replace("github", "raw.githubusercontent").replace("/tree/" + branch +"/", "/" + branch +"/")
+
 def save_to_local(resource):
     url = resource.url
     urlPath = urlparse(url).path
@@ -61,18 +82,9 @@ def save_to_local(resource):
     urllib.request.urlretrieve(url, filePath)
     return filePath
 
-def resolve_key(url, fileName):
-    if "/img/gallery/" in url:
-        return "img/gallery/" + fileName
-    elif "/img/" in url:
-        return "img/" + fileName
-    else:
-        return fileName
-
 def upload_to_s3(resource, filePath, bucket):
     fileName = os.path.basename(filePath)
-    key = resolve_key(resource.url, fileName)
-    s3.Object(bucket, key).put(Body=open(filePath, 'rb'), ContentType=resource.extension)
+    s3.Object(bucket, resource.key).put(Body=open(filePath, 'rb'), ContentType=resource.extension)
 
 def copy_to_s3(resource, bucket):
     filePath = save_to_local(resource)
@@ -80,22 +92,22 @@ def copy_to_s3(resource, bucket):
 
 def lambda_handler(event, context):
     bucket = os.environ['BUCKET_NAME']
-    repositoryUrl = os.environ['REPOSITORY_URL']
+    repositoryUrl = os.environ['REPOSITORY_URL'] + "/tree/" + branch
     resources = find_all_resources(repositoryUrl)
     for resource in resources:
         print(resource.url)
         print(resource.extension)
-        print(resource.isFolder)
-    # try:
-    #     for resource in resources:
-    #         copy_to_s3(resource, bucket)
-    # except Exception as e:
-    #     print("Exception on copy")
-    #     print(e)
-    #     return
+        print(resource.key)
+    try:
+        for resource in resources:
+            copy_to_s3(resource, bucket)
+    except Exception as e:
+        print("Exception on copy")
+        print(e)
+        return
 
 class GithubResource:
-  def __init__(self, url, extension, isFolder):
+  def __init__(self, url, extension,  key):
     self.url = url
     self.extension = extension
-    self.isFolder = isFolder
+    self.key = key
