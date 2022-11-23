@@ -15,7 +15,7 @@ DIRECTORY_ICON_CLASS = 'octicon'
 
 s3 = boto3.resource('s3')
 
-ignoredFiles = os.environ['IGNORED_FILES'].split(",")
+ignoredFilesAndFolders = os.environ['IGNORED_FILES_AND_FOLDERS'].split(",")
 ignoredExtensions = os.environ['IGNORED_EXTENSIONS'].split(",")
 branch = os.environ['BRANCH']
 
@@ -24,7 +24,7 @@ def find_all_resources(url, nestedPath="", resources=[]):
     soup = BeautifulSoup(page.content, 'html.parser')
     wrapperElement = soup.find('div', class_=[WRAPPER_CLASS])
     allFilesElements = wrapperElement.find_all('div', class_=ELEMENT_CLASS)
-    notIgnored = filter(lambda f: f.find('a', href=True, class_=LINK_CLASS).get_text() not in ignoredFiles, allFilesElements)
+    notIgnored = filter(lambda f: f.find('a', href=True, class_=LINK_CLASS).get_text() not in ignoredFilesAndFolders, allFilesElements)
     for element in notIgnored:
         isDirectory = element.find('svg', class_=DIRECTORY_ICON_CLASS)['aria-label'] == "Directory"
         resourceName = element.find('a', href=True, class_=LINK_CLASS).get_text()
@@ -69,13 +69,33 @@ def resolve_content_type(extension):
         return "text/css"
     elif extension == "js":
         return "text/javascript"
+    elif extension == "py":
+        return "text/x-python"
+    elif extension in ["jpeg", "jpg"]:
+        return "image/jpeg"
     elif extension == "png":
         return "image/png"
+    elif extension == "tiff":
+        return "image/tiff"
+    elif extension == "bmp":
+        return "image/bmp"
+    elif extension == "gif":
+        return "image/gif"
+    elif extension in ["svg", "xml"]:
+        return "image/svg+xml"
+    elif extension in ["mp3", "wav", "ogg"]:
+        return "audio/mpeg"
+    elif extension == "pdf":
+        return "application/pdf"
+    elif extension == "zip":
+        return "application/zip"
+    elif extension in ["yaml"]:
+        return "binary/octet-stream"
     else:
         return "text/plain"
 
 def get_raw_url(url):
-    return url.replace("github", "raw.githubusercontent").replace("/tree/" + branch +"/", "/" + branch +"/")
+    return url.replace("https://github.com", "https://raw.githubusercontent.com").replace("/tree/" + branch +"/", "/" + branch +"/")
 
 def save_to_local(resource):
     url = resource.url
@@ -102,13 +122,13 @@ def lambda_handler(event, context):
         print(resource.url)
         print(resource.contentType)
         print(resource.key)
-    # try:
-    #     for resource in resources:
-    #         copy_to_s3(resource, bucket)
-    # except Exception as e:
-    #     print("Exception on copy")
-    #     print(e)
-    #     return
+    try:
+        for resource in resources:
+            copy_to_s3(resource, bucket)
+    except Exception as e:
+        print("Exception on copy")
+        print(e)
+        return
 
 class GithubResource:
   def __init__(self, url, contentType,  key):
