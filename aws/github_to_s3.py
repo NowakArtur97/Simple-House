@@ -15,7 +15,8 @@ DIRECTORY_ICON_CLASS = 'octicon'
 
 s3 = boto3.resource('s3')
 
-ignored = os.environ['IGNORED']
+ignoredFiles = os.environ['IGNORED_FILES'].split(",")
+ignoredExtensions = os.environ['IGNORED_EXTENSIONS'].split(",")
 branch = os.environ['BRANCH']
 
 def find_all_resources(url, nestedPath="", resources=[]):
@@ -23,7 +24,7 @@ def find_all_resources(url, nestedPath="", resources=[]):
     soup = BeautifulSoup(page.content, 'html.parser')
     wrapperElement = soup.find('div', class_=[WRAPPER_CLASS])
     allFilesElements = wrapperElement.find_all('div', class_=ELEMENT_CLASS)
-    notIgnored = filter(lambda f: f.find('a', href=True, class_=LINK_CLASS).get_text() not in ignored, allFilesElements)
+    notIgnored = filter(lambda f: f.find('a', href=True, class_=LINK_CLASS).get_text() not in ignoredFiles, allFilesElements)
     for element in notIgnored:
         isDirectory = element.find('svg', class_=DIRECTORY_ICON_CLASS)['aria-label'] == "Directory"
         resourceName = element.find('a', href=True, class_=LINK_CLASS).get_text()
@@ -38,12 +39,15 @@ def find_all_resources(url, nestedPath="", resources=[]):
                 flatten = flatten_list(nestedResources)
                 resources.append(flatten)
         else:
-            extension = resolve_content_type(link)
+            extension = link.rsplit('.', 1)[1]
+            if extension in ignoredExtensions:
+                continue
+            contentType = resolve_content_type(extension)
             if nestedPath == "":
-                resource = GithubResource(get_raw_url(link), extension, resourceName)
+                resource = GithubResource(get_raw_url(link), contentType, resourceName)
                 resources.append(resource)
             else:
-                resource = GithubResource(get_raw_url(link), extension, nestedPath + "/" + resourceName)
+                resource = GithubResource(get_raw_url(link), contentType, nestedPath + "/" + resourceName)
                 resources.append(resource)
 
     return flatten_list(resources)
@@ -58,8 +62,7 @@ def flatten_list(_2d_list):
             flat_list.append(element)
     return flat_list
 
-def resolve_content_type(url):
-    extension = url.rsplit('.', 1)[1]
+def resolve_content_type(extension):
     if extension == "html":
         return "text/html"
     elif extension == "css":
@@ -69,7 +72,7 @@ def resolve_content_type(url):
     elif extension == "png":
         return "image/png"
     else:
-        return "image/jpeg"
+        return "text/plain"
 
 def get_raw_url(url):
     return url.replace("github", "raw.githubusercontent").replace("/tree/" + branch +"/", "/" + branch +"/")
@@ -84,7 +87,7 @@ def save_to_local(resource):
 
 def upload_to_s3(resource, filePath, bucket):
     fileName = os.path.basename(filePath)
-    s3.Object(bucket, resource.key).put(Body=open(filePath, 'rb'), ContentType=resource.extension)
+    s3.Object(bucket, resource.key).put(Body=open(filePath, 'rb'), ContentType=resource.contentType)
 
 def copy_to_s3(resource, bucket):
     filePath = save_to_local(resource)
@@ -94,20 +97,21 @@ def lambda_handler(event, context):
     bucket = os.environ['BUCKET_NAME']
     repositoryUrl = os.environ['REPOSITORY_URL'] + "/tree/" + branch
     resources = find_all_resources(repositoryUrl)
+    print("**********")
     for resource in resources:
         print(resource.url)
-        print(resource.extension)
+        print(resource.contentType)
         print(resource.key)
-    try:
-        for resource in resources:
-            copy_to_s3(resource, bucket)
-    except Exception as e:
-        print("Exception on copy")
-        print(e)
-        return
+    # try:
+    #     for resource in resources:
+    #         copy_to_s3(resource, bucket)
+    # except Exception as e:
+    #     print("Exception on copy")
+    #     print(e)
+    #     return
 
 class GithubResource:
-  def __init__(self, url, extension,  key):
+  def __init__(self, url, contentType,  key):
     self.url = url
-    self.extension = extension
+    self.contentType = contentType
     self.key = key

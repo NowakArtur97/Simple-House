@@ -72,7 +72,8 @@ Resources:
         Variables:
           BUCKET_NAME: !Ref S3Bucket
           REPOSITORY_URL: https://github.com/NowakArtur97/Simple-House
-          IGNORED: README.md,aws
+          IGNORED_FILES: aws
+          IGNORED_EXTENSIONS: md
           BRANCH: master
       Code:
         ZipFile: |
@@ -93,7 +94,7 @@ Resources:
 
           s3 = boto3.resource('s3')
 
-          ignored = os.environ['IGNORED']
+          ignoredFiles = os.environ['IGNORED_FILES']
           branch = os.environ['BRANCH']
 
           def find_all_resources(url, nestedPath="", resources=[]):
@@ -101,7 +102,7 @@ Resources:
               soup = BeautifulSoup(page.content, 'html.parser')
               wrapperElement = soup.find('div', class_=[WRAPPER_CLASS])
               allFilesElements = wrapperElement.find_all('div', class_=ELEMENT_CLASS)
-              notIgnored = filter(lambda f: f.find('a', href=True, class_=LINK_CLASS).get_text() not in ignored, allFilesElements)
+              notIgnored = filter(lambda f: f.find('a', href=True, class_=LINK_CLASS).get_text() not in ignoredFiles, allFilesElements)
               for element in notIgnored:
                   isDirectory = element.find('svg', class_=DIRECTORY_ICON_CLASS)['aria-label'] == "Directory"
                   resourceName = element.find('a', href=True, class_=LINK_CLASS).get_text()
