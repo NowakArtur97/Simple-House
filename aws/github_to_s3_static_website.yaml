@@ -323,9 +323,37 @@ Resources:
               - Effect: Allow
                 Action:
                   - s3:ListBucket
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:s3:::"
+                    - !Ref GithubToS3Bucket
+                    - ""
+              - Effect: Allow
+                Action:
                   - s3:PutObject
                   - s3:DeleteObject
-                Resource: "*"
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:s3:::"
+                    - !Ref GithubToS3Bucket
+                    - "/*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:s3:::"
+                    - !Ref DependencyToS3Bucket
+                    - ""
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: !Join
+                  - ""
+                  - - "arn:aws:s3:::"
+                    - !Ref DependencyToS3Bucket
+                    - "/*"
 Outputs:
   WebsiteUrl:
     Description: "Website Url"
