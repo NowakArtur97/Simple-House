@@ -113,24 +113,32 @@ def copy_to_s3(resource):
     filePath = save_to_local(resource)
     upload_to_s3(resource, filePath)
 
+def clear_bucket():
+    s3.Bucket(BUCKET).objects.all().delete()
+
 def lambda_handler(event, context):
     responseData = {}
-    try:    
-        repositoryUrl = os.environ['REPOSITORY_URL'] + "/tree/" + BRANCH
-        resources = find_all_resources(repositoryUrl)
-        print(repositoryUrl)
-        for resource in resources:
-            print(resource.url)
-            print(resource.contentType)
-            print(resource.key)
-        try:
+    requestType = event['RequestType']
+    try:
+        if requestType == 'Create':
+            repositoryUrl = os.environ['REPOSITORY_URL'] + "/tree/" + BRANCH
+            resources = find_all_resources(repositoryUrl)
+            print(repositoryUrl)
             for resource in resources:
-                copy_to_s3(resource)
-        except Exception as e:
-            print("Exception on copy")
-            print(e)
-            cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
-            return
+                print(resource.url)
+                print(resource.contentType)
+                print(resource.key)
+            try:
+                for resource in resources:
+                    copy_to_s3(resource)
+            except Exception as e:
+                print("Exception on copy")
+                print(e)
+                cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                return
+        elif requestType == 'Delete':
+            clear_bucket()
+            print("Successfully cleared bucket: " + BUCKET)
         cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
     except Exception as e:
         print(e)

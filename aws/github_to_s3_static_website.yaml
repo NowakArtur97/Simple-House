@@ -41,34 +41,6 @@ Resources:
     Version: "1.0"
     Properties:
       ServiceToken: !GetAtt GithubToS3LambdaFunction.Arn
-  LambdaFunctionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - lambda.amazonaws.com
-            Action:
-              - sts:AssumeRole
-      Path: "/"
-      Policies:
-        - PolicyName: LambdaFunctionPolicy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: "*"
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                Resource: "*"
   PythonDependenciesLayer:
     Type: "AWS::Lambda::LayerVersion"
     DependsOn: DependencyToS3LambdaInvoke
@@ -212,24 +184,32 @@ Resources:
               filePath = save_to_local(resource)
               upload_to_s3(resource, filePath)
 
+          def clear_bucket():
+              s3.Bucket(BUCKET).objects.all().delete()
+
           def lambda_handler(event, context):
               responseData = {}
-              try:    
-                  repositoryUrl = os.environ['REPOSITORY_URL'] + "/tree/" + BRANCH
-                  resources = find_all_resources(repositoryUrl)
-                  print(repositoryUrl)
-                  for resource in resources:
-                      print(resource.url)
-                      print(resource.contentType)
-                      print(resource.key)
-                  try:
+              requestType = event['RequestType']
+              try:
+                  if requestType == 'Create':
+                      repositoryUrl = os.environ['REPOSITORY_URL'] + "/tree/" + BRANCH
+                      resources = find_all_resources(repositoryUrl)
+                      print(repositoryUrl)
                       for resource in resources:
-                          copy_to_s3(resource)
-                  except Exception as e:
-                      print("Exception on copy")
-                      print(e)
-                      cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
-                      return
+                          print(resource.url)
+                          print(resource.contentType)
+                          print(resource.key)
+                      try:
+                          for resource in resources:
+                              copy_to_s3(resource)
+                      except Exception as e:
+                          print("Exception on copy")
+                          print(e)
+                          cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                          return
+                  elif requestType == 'Delete':
+                      clear_bucket()
+                      print("Successfully cleared bucket: " + BUCKET)
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
               except Exception as e:
                   print(e)
@@ -240,7 +220,6 @@ Resources:
               self.url = url
               self.contentType = contentType
               self.key = key
-
   DependencyToS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -283,7 +262,7 @@ Resources:
           import cfnresponse
 
           s3 = boto3.resource('s3')
-          BUCKET_NAME = os.environ['BUCKET_NAME']
+          BUCKET = os.environ['BUCKET_NAME']
 
           def save_to_local(url):
               urlPath = urlparse(url).path
@@ -295,20 +274,58 @@ Resources:
           def copy_to_s3(url):
               filePath = save_to_local(url)
               fileName = os.path.basename(filePath)
-              s3.meta.client.upload_file(filePath, BUCKET_NAME, fileName)
-              s3.Object(BUCKET_NAME, fileName).put(Body=open(filePath, 'rb'), ContentType="application/zip")
+              s3.meta.client.upload_file(filePath, BUCKET, fileName)
+              s3.Object(BUCKET, fileName).put(Body=open(filePath, 'rb'), ContentType="application/zip")
+
+          def clear_bucket():
+              s3.Bucket(BUCKET).objects.all().delete()
 
           def lambda_handler(event, context):
               responseData = {}
-              try:    
-                  url = os.environ['URL']
-                  copy_to_s3(url)
-                  print("Successfully copied file from url: " + url + " to BUCKET_NAME: " + BUCKET_NAME)
+              requestType = event['RequestType']
+              try:
+                  if requestType == 'Create':
+                      url = os.environ['URL']
+                      copy_to_s3(url)
+                      print("Successfully copied file from url: " + url + " to bucket: " + BUCKET)
+                  elif requestType == 'Delete':
+                      clear_bucket()
+                      print("Successfully cleared bucket: " + BUCKET)
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
               except Exception as e:
                   print("Exception")
                   print(e)
                   cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: LambdaFunctionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: "*"
 Outputs:
   WebsiteUrl:
     Description: "Website Url"
